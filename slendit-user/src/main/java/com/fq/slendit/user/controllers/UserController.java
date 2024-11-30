@@ -11,7 +11,7 @@ public class UserController {
 	
 	@PostMapping("/register")
 	public String save(@RequestParam String s) {
-		return s;
+		return "Registered successfully";
 		
 	}
 }
