@@ -1,7 +1,12 @@
 package com.fq.slendit.user.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,16 +17,29 @@ import lombok.Setter;
 public class Address {
 
 	@Id
-	private String id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
+	
+	@NotNull(message = "UserId is required")
+	@Min(value = 1, message = "UserId must be a positive number")
 	private String userId;
 
+	@Column
 	private String streetAddress;
+	@Column
 	private String city;
+	@Column
 	private String state;
+	@Column
 	private String zip;
+	@Column
 	private String country;
+	@Column
 	private String type;
-	
-	private String addressData;
-	
+
+	@Column
+	private String created;
+	@Column
+	private String updated;
+
 }
