@@ -1,7 +1,6 @@
 package com.fq.slendit.user.request;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Email;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +9,6 @@ import lombok.Setter;
 @Setter
 public class GetUserRequest {
 
-	@NotNull(message = "UserId is required")
-	@Min(value = 1, message = "UserId must be a positive number")
-	private String userId;
+	@Email(message = "Please provide a valid email")
+	private String email;
 }

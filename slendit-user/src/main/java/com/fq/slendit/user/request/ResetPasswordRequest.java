@@ -1,5 +1,6 @@
 package com.fq.slendit.user.request;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -11,12 +12,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ResetPasswordRequest {
-
+	
 	@NotNull(message = "UserId is required")
 	@Min(value = 1, message = "UserId must be a positive number")
 	private int userId;
+
+	@Email(message = "Please provide a valid email")
+	private String email;
 	@NotBlank(message = "Please enter the current password")
-	private String currentPassword;
+	private String conformPassword;
 	@NotBlank(message = "Please enter the new password")
 	@Pattern(
 			regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", 

@@ -1,7 +1,5 @@
 package com.fq.slendit.user.entity;
 
-import java.time.LocalDateTime;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -31,7 +29,7 @@ public class UserPicture {
     @Column(nullable = false)
     private byte[] picture;
 
-    @Column(name = "upload_date", nullable = false)
-    private LocalDateTime uploadDate = LocalDateTime.now();
+    @Column(name = "upload_date")
+    private String uploadDate;
 
 }

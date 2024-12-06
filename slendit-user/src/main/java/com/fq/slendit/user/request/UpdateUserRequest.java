@@ -1,7 +1,6 @@
 package com.fq.slendit.user.request;
 
 import javax.persistence.Column;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -17,10 +16,7 @@ public class UpdateUserRequest {
 	
 	@NotNull(message = "UserId is required")
 	@Min(value = 1, message = "UserId must be a positive number")
-	private int id;
-
-	@Email(message = "Please provide a valid email")
-	private String email;
+	private int userId;
 
 	@NotBlank(message = "First name is required")
 	private String firstName;
@@ -32,6 +28,11 @@ public class UpdateUserRequest {
 	@NotBlank(message = "Display name is required")
 	@Size(max = 50, message = "Display name must not exceed 50 characters")
 	private String userName;
+	
+	@Column
+	private String homeAddress;
+	@Column
+	private String workAddress;
 
 	@Size(max = 255, message = "Home street address must not exceed 255 characters")
 	private String homeStreetAddress;
@@ -58,11 +59,6 @@ public class UpdateUserRequest {
 	private String workZip;
 	@Column
 	private String workCountry;
-
-	@Column
-	private String homeAddress;
-	@Column
-	private String workAddress;
 
 	@NotBlank(message = "Mobile number is required")
 	@Pattern(regexp = "^[0-9]{10}$", message = "Please provide a valid mobile number")

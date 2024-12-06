@@ -8,7 +8,7 @@ public class SlenditUserApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SlenditUserApplication.class, args);
-		System.out.println("Hello user application");
+		System.out.println("Application started");
 	}
 
 }

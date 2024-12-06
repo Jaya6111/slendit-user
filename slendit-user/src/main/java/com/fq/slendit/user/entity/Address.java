@@ -22,7 +22,7 @@ public class Address {
 	
 	@NotNull(message = "UserId is required")
 	@Min(value = 1, message = "UserId must be a positive number")
-	private String userId;
+	private int userId;
 
 	@Column
 	private String streetAddress;

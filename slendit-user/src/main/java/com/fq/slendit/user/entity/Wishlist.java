@@ -1,7 +1,5 @@
 package com.fq.slendit.user.entity;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,7 +19,7 @@ public class Wishlist {
 	private int id;
 
 	@Column
-	private String userId;
+	private int userId;
 	@Column
 	private String productName;
 	@Column
@@ -29,7 +27,7 @@ public class Wishlist {
 	@Column
 	private String userEmail;
 	@Column
-	private Date created;
+	private String created;
 	@Column
-	private Date updated;
+	private String updated;
 }
