@@ -1,5 +1,6 @@
 package com.fq.slendit.user.entity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -37,7 +38,8 @@ public class User {
 	private String phNoVerify;
 	private String verificationCode;
 	
-	private String emailVerify;
+	private String isEmailVerified;
+	private String mobileVerified;
 	private String role;
 	
 	private String aboutMe;
@@ -46,8 +48,8 @@ public class User {
 	private String blockedBy;
 	private String blockedDate;
 	private String isAddressAdded;
-	private String created;
-	private String updated;
+	private LocalDateTime created;
+	private LocalDateTime updated;
 	
 	private int numberOfItemsUploaded;
 

@@ -1,5 +1,7 @@
 package com.fq.slendit.user.entity;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -25,9 +27,9 @@ public class BlockUser  {
 	@Column
 	private String blockedBy;
 	@Column
-	private String created;
+	private LocalDateTime created;
 	@Column
-	private String updated;
+	private LocalDateTime updated;
 	@Column
 	private String status;
 	

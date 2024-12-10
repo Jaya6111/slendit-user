@@ -4,7 +4,9 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +21,7 @@ import com.fq.slendit.user.response.GetUserResponse;
 import com.fq.slendit.user.response.RegistrationResponse;
 import com.fq.slendit.user.response.ResetPasswordResponse;
 import com.fq.slendit.user.response.UpdateUserResponse;
+import com.fq.slendit.user.response.VerificationToken;
 import com.fq.slendit.user.service.UserService;
 
 @RestController
@@ -54,5 +57,16 @@ public class UserController {
 			return userService.resetPassword(request);
 		}
 		return new ResetPasswordResponse(HttpStatus.PRECONDITION_FAILED, "412", "Password not matching", null);
+	}
+	
+	@GetMapping("/get-token/{token}")
+	public VerificationToken getVerifivcationToken(@PathVariable String token) {
+		
+		return userService.getVerifivcationToken(token);
+	}
+	
+	@DeleteMapping("/delete-token/{token}")
+	public String deleteToken(@PathVariable String token) {
+		return userService.deleteToken(token);
 	}
 }

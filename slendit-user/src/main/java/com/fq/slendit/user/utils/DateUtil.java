@@ -1,18 +1,15 @@
 package com.fq.slendit.user.utils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class DateUtil {
 
-	public static String getCurrentDate() {
-
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/YYYY");
-		return simpleDateFormat.format(new Date());
+	public static LocalDate getCurrentDate() {
+		return LocalDate.now();
 	}
 
-	public static String getCurrentDateTime() {
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss");
-		return simpleDateFormat.format(new Date());
+	public static LocalDateTime getCurrentDateTime() {
+		return LocalDateTime.now();
 	}
 }

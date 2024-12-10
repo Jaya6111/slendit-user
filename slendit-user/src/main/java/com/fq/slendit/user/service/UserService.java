@@ -10,6 +10,7 @@ import com.fq.slendit.user.response.GetUserResponse;
 import com.fq.slendit.user.response.RegistrationResponse;
 import com.fq.slendit.user.response.ResetPasswordResponse;
 import com.fq.slendit.user.response.UpdateUserResponse;
+import com.fq.slendit.user.response.VerificationToken;
 
 public interface UserService {
 
@@ -20,5 +21,9 @@ public interface UserService {
 	public ResetPasswordResponse resetPassword(@Valid ResetPasswordRequest request);
 
 	public GetUserResponse getUser(@Valid GetUserRequest request);
+
+	public VerificationToken getVerifivcationToken(String token);
+
+	public String deleteToken(String token);
 
 }

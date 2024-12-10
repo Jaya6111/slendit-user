@@ -8,9 +8,12 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.fq.slendit.user.entity.User;
 import com.fq.slendit.user.repository.UserRepository;
@@ -22,48 +25,61 @@ import com.fq.slendit.user.response.GetUserResponse;
 import com.fq.slendit.user.response.RegistrationResponse;
 import com.fq.slendit.user.response.ResetPasswordResponse;
 import com.fq.slendit.user.response.UpdateUserResponse;
+import com.fq.slendit.user.response.VerificationToken;
 import com.fq.slendit.user.service.UserService;
 import com.fq.slendit.user.utils.UserUtil;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
-public class UserServiceImpl implements UserService{
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
+	private final RestTemplate restTemplate;
+
 	private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-	
+
 	@Override
 	public RegistrationResponse registration(@Valid RegistrationRequest request) {
 
 		logger.info("UserServiceImpl.registration(): entry point");
 		RegistrationResponse response = null;
 		Optional<User> users = userRepository.findByEmail(request.getEmail());
-		
-		if(users.isPresent()) {
+
+		if (users.isPresent()) {
 			logger.info("UserServiceImpl.registration(): Given Email is already in use");
-			return new RegistrationResponse(HttpStatus.PRECONDITION_FAILED, "412", "Given Email is already in use", null);
+			return new RegistrationResponse(HttpStatus.PRECONDITION_FAILED, "412", "Given Email is already in use",
+					null);
 		}
-		
+
 		User user = UserUtil.setUser(request);
 		user.setPassword(encodePassword(request.getPassword()));
-		
+
 		user = userRepository.save(user);
-		
-		if(user.getUserId() > 0) {
+
+		if (user.getUserId() > 0) {
 			logger.info("UserServiceImpl.registration(): Registration successfull");
 			response = new RegistrationResponse(HttpStatus.CREATED, "201", "Registration successfull", null);
 			response.setUser(user);
-			//kafkaTemplate.sed(topic, verificatinAndWelcome);
-			
-		}else {
+			VerificationToken token = new VerificationToken();
+			token.setToken(user.getVerificationCode());
+			token.setExpiryDate(user.getUpdated());
+			token.setEmail(user.getEmail());
+			restTemplate.postForEntity("http://localhost:8083/email/confirm-email", token, String.class);
+			// kafkaTemplate.sed(topic, verificatinAndWelcome);
+
+		} else {
 			logger.info("UserServiceImpl.registration(): Registration get failed");
-			response = new RegistrationResponse(HttpStatus.INTERNAL_SERVER_ERROR, "500", "Registration is failed", null);
+			response = new RegistrationResponse(HttpStatus.INTERNAL_SERVER_ERROR, "500", "Registration is failed",
+					null);
 		}
-		
+
 		return response;
 	}
 
@@ -71,35 +87,36 @@ public class UserServiceImpl implements UserService{
 	@Transactional
 	public UpdateUserResponse updateUser(@Valid UpdateUserRequest request) {
 
-		
 		Optional<User> opUser = userRepository.findById(request.getUserId());
-		
-		if(!opUser.isPresent()) {
-			return new UpdateUserResponse(HttpStatus.NOT_FOUND, "404", "User not found with Id: "  + request.getUserId(), null);
+
+		if (!opUser.isPresent()) {
+			return new UpdateUserResponse(HttpStatus.NOT_FOUND, "404", "User not found with Id: " + request.getUserId(),
+					null);
 		}
-		
+
 		User user = opUser.get();
 		user = UserUtil.setUpdateUser(user, request);
 
 		user = userRepository.save(user);
-		
-		UpdateUserResponse response = new UpdateUserResponse(HttpStatus.OK, "200", "User details updated successfully", null);
+
+		UpdateUserResponse response = new UpdateUserResponse(HttpStatus.OK, "200", "User details updated successfully",
+				null);
 		response.setUser(user);
-		
+
 		return response;
 	}
-	
+
 	@Override
 	public GetUserResponse getUser(@Valid GetUserRequest request) {
-		
+
 		GetUserResponse response = null;
-		
+
 		Optional<User> opUser = userRepository.findByEmail(request.getEmail());
-		if(opUser.isPresent()) {
+		if (opUser.isPresent()) {
 			response = new GetUserResponse(HttpStatus.OK, "200", "User found success", null);
 			response.setUser(opUser.get());
 		}
-		
+
 		return new GetUserResponse(HttpStatus.NOT_FOUND, "404", "User not found", null);
 	}
 
@@ -120,8 +137,43 @@ public class UserServiceImpl implements UserService{
 
 		return response;
 	}
-	
+
 	private String encodePassword(String password) {
 		return passwordEncoder.encode(password);
+	}
+
+	@Override
+	public VerificationToken getVerifivcationToken(String token) {
+
+		Optional<VerificationToken> Otoken = Optional.empty();
+		VerificationToken userToken = new VerificationToken();
+
+		if (null != token && !"".equals(token.trim())) {
+			Otoken = userRepository.findByVerificationCode(token);
+
+			if (Otoken.isPresent()) {
+				userToken = Otoken.get();
+				userToken.setExpiryDate(userToken.getExpiryDate().plusHours(24));
+			}
+			return userToken;
+		}
+
+		userToken.setToken(null);
+		userToken.setExpiryDate(null);
+		return userToken;
+	}
+
+	@Override
+	public String deleteToken(String token) {
+
+		try {
+			if (null != token && !"".equals(token)) {
+				userRepository.deleteToken(token);
+				return "Token deletion success";
+			}
+		} catch (Exception e) {
+			return "Token not found";
+		}
+		return "Invalid Token";
 	}
 }
