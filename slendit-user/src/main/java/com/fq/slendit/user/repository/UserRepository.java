@@ -13,21 +13,25 @@ import com.fq.slendit.user.entity.User;
 import com.fq.slendit.user.response.VerificationToken;
 
 @Repository
+@Transactional
 public interface UserRepository extends JpaRepository<User, Integer>{
 
 	Optional<User> findByEmail(String email);
 	
     @Modifying
-    @Transactional
     @Query("UPDATE User u SET u.password = :newPassword WHERE u.email = :email and u.id = :userId")
-    int resetPassword(String newPassword, String email, int userId);
+    int resetPassword(@Param("newPassword") String newPassword, @Param("email") String email, @Param("userId") int userId);
     
-    @Query("SELECT u.verificationCode, u.updated FROM User u WHERE u.verificationCode = :token")
+    @Query("SELECT new com.fq.slendit.user.response.VerificationToken(u.verificationCode, u.email, u.updated) FROM User u WHERE u.verificationCode = :token")
     Optional<VerificationToken> findByVerificationCode(@Param("token") String token);
 
     @Modifying
     @Query("UPDATE User u SET u.verificationCode = NULL, u.isEmailVerified = 'Y' WHERE u.verificationCode = :token")
 	void deleteToken(@Param("token") String token);
+    
+    @Modifying
+    @Query("UPDATE User u SET u.email = :newEmail, u.isEmailVerified = 'N' WHERE u.email = :currentEmail")
+	int updateEmail(@Param("newEmail") String newEmail, @Param("currentEmail") String currentEmail);
 
 	
 }

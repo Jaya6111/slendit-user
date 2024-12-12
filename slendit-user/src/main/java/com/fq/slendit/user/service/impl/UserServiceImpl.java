@@ -5,12 +5,8 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,19 +16,24 @@ import com.fq.slendit.user.repository.UserRepository;
 import com.fq.slendit.user.request.GetUserRequest;
 import com.fq.slendit.user.request.RegistrationRequest;
 import com.fq.slendit.user.request.ResetPasswordRequest;
+import com.fq.slendit.user.request.UpdateEmailRequest;
 import com.fq.slendit.user.request.UpdateUserRequest;
+import com.fq.slendit.user.request.WelcomeMailRequest;
 import com.fq.slendit.user.response.GetUserResponse;
 import com.fq.slendit.user.response.RegistrationResponse;
 import com.fq.slendit.user.response.ResetPasswordResponse;
+import com.fq.slendit.user.response.UpdateEmailResponse;
 import com.fq.slendit.user.response.UpdateUserResponse;
 import com.fq.slendit.user.response.VerificationToken;
 import com.fq.slendit.user.service.UserService;
 import com.fq.slendit.user.utils.UserUtil;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
 	@Autowired
@@ -43,17 +44,15 @@ public class UserServiceImpl implements UserService {
 	
 	private final RestTemplate restTemplate = new RestTemplate();
 
-	private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-
 	@Override
 	public RegistrationResponse registration(@Valid RegistrationRequest request) {
 
-		logger.info("UserServiceImpl.registration(): entry point");
+		log.info("UserServiceImpl.registration(): entry point");
 		RegistrationResponse response = null;
 		Optional<User> users = userRepository.findByEmail(request.getEmail());
 
 		if (users.isPresent()) {
-			logger.info("UserServiceImpl.registration(): Given Email is already in use");
+			log.info("UserServiceImpl.registration(): Given Email is already in use");
 			return new RegistrationResponse(HttpStatus.PRECONDITION_FAILED, "412", "Given Email is already in use",
 					null);
 		}
@@ -64,18 +63,21 @@ public class UserServiceImpl implements UserService {
 		user = userRepository.save(user);
 
 		if (user.getUserId() > 0) {
-			logger.info("UserServiceImpl.registration(): Registration successfull");
+			log.info("UserServiceImpl.registration(): Registration successfull");
 			response = new RegistrationResponse(HttpStatus.CREATED, "201", "Registration successfull", null);
 			response.setUser(user);
-			VerificationToken token = new VerificationToken();
-			token.setToken(user.getVerificationCode());
-			token.setExpiryDate(user.getUpdated());
-			token.setEmail(user.getEmail());
+			
+			VerificationToken token = new VerificationToken(user.getVerificationCode(), user.getEmail(), user.getUpdated().plusHours(24));
+
+			
+			WelcomeMailRequest welcomeRequest = new WelcomeMailRequest(user.getEmail(), user.getFirstName() + " " + user.getLastName(), "Welcome to SLENDIT");
+			
 			restTemplate.postForEntity("http://localhost:8083/email/confirm-email", token, String.class);
+			restTemplate.postForEntity("http://localhost:8083/email/welcome", welcomeRequest, String.class);
 			// kafkaTemplate.sed(topic, verificatinAndWelcome);
 
 		} else {
-			logger.info("UserServiceImpl.registration(): Registration get failed");
+			log.info("UserServiceImpl.registration(): Registration get failed");
 			response = new RegistrationResponse(HttpStatus.INTERNAL_SERVER_ERROR, "500", "Registration is failed",
 					null);
 		}
@@ -175,5 +177,31 @@ public class UserServiceImpl implements UserService {
 			return "Token not found";
 		}
 		return "Invalid Token";
+	}
+
+	@Override
+	public UpdateEmailResponse updateEmail(@Valid UpdateEmailRequest request) {
+		int isUpdated = 0;
+		UpdateEmailResponse response = null;
+		Optional<User> users = userRepository.findByEmail(request.getCurrentEmail());
+
+		if (!users.isPresent()) {
+			response = new UpdateEmailResponse(HttpStatus.PRECONDITION_FAILED, "412", "Pre condition failed", null);
+			response.setMessage("No user found with given current email");
+			return response;
+		} else {
+			Optional<User> OpUser = userRepository.findByEmail(request.getNewEmail());
+
+			if (!OpUser.isPresent()) {
+				isUpdated = userRepository.updateEmail(request.getNewEmail(), request.getCurrentEmail());
+				return (isUpdated > 0)
+						? new UpdateEmailResponse(HttpStatus.OK, "200", "Email updatedd Successfully", null)
+						: new UpdateEmailResponse(HttpStatus.EXPECTATION_FAILED, "417", "Failed to update the Email",
+								null);
+			}
+			response = new UpdateEmailResponse(HttpStatus.PRECONDITION_FAILED, "412", "Pre condition failed", null);
+			response.setMessage("New Email is already registered for another user");
+			return response;
+		}
 	}
 }

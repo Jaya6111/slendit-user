@@ -16,10 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fq.slendit.user.request.GetUserRequest;
 import com.fq.slendit.user.request.RegistrationRequest;
 import com.fq.slendit.user.request.ResetPasswordRequest;
+import com.fq.slendit.user.request.UpdateEmailRequest;
 import com.fq.slendit.user.request.UpdateUserRequest;
 import com.fq.slendit.user.response.GetUserResponse;
 import com.fq.slendit.user.response.RegistrationResponse;
 import com.fq.slendit.user.response.ResetPasswordResponse;
+import com.fq.slendit.user.response.UpdateEmailResponse;
 import com.fq.slendit.user.response.UpdateUserResponse;
 import com.fq.slendit.user.response.VerificationToken;
 import com.fq.slendit.user.service.UserService;
@@ -68,5 +70,10 @@ public class UserController {
 	@DeleteMapping("/delete-token/{token}")
 	public String deleteToken(@PathVariable String token) {
 		return userService.deleteToken(token);
+	}
+	
+	@PutMapping("/update-email")
+	public UpdateEmailResponse updateEmail(@RequestBody @Valid UpdateEmailRequest request) {
+		return userService.updateEmail(request);
 	}
 }

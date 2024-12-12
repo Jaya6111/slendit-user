@@ -5,10 +5,12 @@ import javax.validation.Valid;
 import com.fq.slendit.user.request.GetUserRequest;
 import com.fq.slendit.user.request.RegistrationRequest;
 import com.fq.slendit.user.request.ResetPasswordRequest;
+import com.fq.slendit.user.request.UpdateEmailRequest;
 import com.fq.slendit.user.request.UpdateUserRequest;
 import com.fq.slendit.user.response.GetUserResponse;
 import com.fq.slendit.user.response.RegistrationResponse;
 import com.fq.slendit.user.response.ResetPasswordResponse;
+import com.fq.slendit.user.response.UpdateEmailResponse;
 import com.fq.slendit.user.response.UpdateUserResponse;
 import com.fq.slendit.user.response.VerificationToken;
 
@@ -25,5 +27,7 @@ public interface UserService {
 	public VerificationToken getVerifivcationToken(String token);
 
 	public String deleteToken(String token);
+
+	public UpdateEmailResponse updateEmail(@Valid UpdateEmailRequest request);
 
 }
