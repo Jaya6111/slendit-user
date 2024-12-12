@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
-	private final RestTemplate restTemplate;
+	private final RestTemplate restTemplate = new RestTemplate();
 
 	private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
