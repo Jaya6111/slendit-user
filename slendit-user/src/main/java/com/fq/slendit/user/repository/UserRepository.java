@@ -30,8 +30,8 @@ public interface UserRepository extends JpaRepository<User, Integer>{
 	void deleteToken(@Param("token") String token);
     
     @Modifying
-    @Query("UPDATE User u SET u.email = :newEmail, u.isEmailVerified = 'N' WHERE u.email = :currentEmail")
-	int updateEmail(@Param("newEmail") String newEmail, @Param("currentEmail") String currentEmail);
+    @Query("UPDATE User u SET u.email = :newEmail, u.verificationCode = :token, u.isEmailVerified = 'N' WHERE u.email = :currentEmail")
+	int updateEmail(@Param("newEmail") String newEmail, @Param("token") String token, @Param("currentEmail") String currentEmail);
 
 	
 }

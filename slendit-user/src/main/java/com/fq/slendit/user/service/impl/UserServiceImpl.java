@@ -1,6 +1,7 @@
 package com.fq.slendit.user.service.impl;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -26,6 +27,7 @@ import com.fq.slendit.user.response.UpdateEmailResponse;
 import com.fq.slendit.user.response.UpdateUserResponse;
 import com.fq.slendit.user.response.VerificationToken;
 import com.fq.slendit.user.service.UserService;
+import com.fq.slendit.user.utils.DateUtil;
 import com.fq.slendit.user.utils.UserUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -193,11 +195,22 @@ public class UserServiceImpl implements UserService {
 			Optional<User> OpUser = userRepository.findByEmail(request.getNewEmail());
 
 			if (!OpUser.isPresent()) {
-				isUpdated = userRepository.updateEmail(request.getNewEmail(), request.getCurrentEmail());
-				return (isUpdated > 0)
-						? new UpdateEmailResponse(HttpStatus.OK, "200", "Email updatedd Successfully", null)
-						: new UpdateEmailResponse(HttpStatus.EXPECTATION_FAILED, "417", "Failed to update the Email",
-								null);
+				String verificationCode = UUID.randomUUID().toString();
+				isUpdated = userRepository.updateEmail(request.getNewEmail(),verificationCode, request.getCurrentEmail());
+
+				if (isUpdated > 0) {
+
+					VerificationToken token = new VerificationToken(verificationCode, request.getNewEmail(),
+							DateUtil.getCurrentDateTime().plusHours(24));
+					restTemplate.postForEntity("http://localhost:8083/email/confirm-email", token, String.class);
+
+					return new UpdateEmailResponse(HttpStatus.OK, "200", "Email updatedd Successfully", null);
+
+				} else {
+					return new UpdateEmailResponse(HttpStatus.EXPECTATION_FAILED, "417", "Failed to update the Email",
+							null);
+				}
+
 			}
 			response = new UpdateEmailResponse(HttpStatus.PRECONDITION_FAILED, "412", "Pre condition failed", null);
 			response.setMessage("New Email is already registered for another user");
