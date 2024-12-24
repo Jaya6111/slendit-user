@@ -27,7 +27,7 @@ import com.fq.slendit.user.response.VerificationToken;
 import com.fq.slendit.user.service.UserService;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/slendit/user")
 public class UserController {
 	
 	@Autowired

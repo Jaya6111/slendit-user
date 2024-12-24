@@ -119,9 +119,11 @@ public class UserServiceImpl implements UserService {
 		if (opUser.isPresent()) {
 			response = new GetUserResponse(HttpStatus.OK, "200", "User found success", null);
 			response.setUser(opUser.get());
+		}else {
+			response = new GetUserResponse(HttpStatus.NOT_FOUND, "404", "User not found", null); 
 		}
 
-		return new GetUserResponse(HttpStatus.NOT_FOUND, "404", "User not found", null);
+		return response;
 	}
 
 	@Override
