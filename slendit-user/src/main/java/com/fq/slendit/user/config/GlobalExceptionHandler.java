@@ -67,15 +67,6 @@ public class GlobalExceptionHandler {
         return buildExceptionResponse(HttpStatus.NOT_FOUND, "404", "Endpoint not found", null);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ExceptionResponse constraintViolationHandler(ConstraintViolationException ex) {
-        Set<String> errorMessages = ex.getConstraintViolations().stream()
-                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                .collect(Collectors.toSet());
-
-        return buildExceptionResponse(HttpStatus.BAD_REQUEST, "400", "Validation failed", errorMessages);
-    }
-
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ExceptionResponse methodNotSupportedHandler(HttpRequestMethodNotSupportedException ex) {
         return buildExceptionResponse(HttpStatus.METHOD_NOT_ALLOWED, "405", "HTTP method not supported", null);
@@ -94,6 +85,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MultipartException.class)
     public ExceptionResponse multipartHandler(MultipartException ex) {
         return buildExceptionResponse(HttpStatus.BAD_REQUEST, "400", "Error processing file upload", null);
+    }
+    
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ExceptionResponse constraintViolationHandler(ConstraintViolationException ex) {
+        Set<String> errorMessages = ex.getConstraintViolations().stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .collect(Collectors.toSet());
+
+        return buildExceptionResponse(HttpStatus.BAD_REQUEST, "400", "Validation failed", errorMessages);
     }
 
     @ExceptionHandler(HttpClientErrorException.class)

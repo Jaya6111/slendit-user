@@ -46,7 +46,7 @@ public class UserController {
 		return userService.updateUser(request);
 	}
 	
-	@GetMapping("/getUser")
+	@PostMapping("/getUser")
 	public GetUserResponse getUser(@RequestBody @Valid GetUserRequest request) {
 		
 		return userService.getUser(request);
